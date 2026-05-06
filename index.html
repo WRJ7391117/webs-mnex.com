@@ -196,6 +196,9 @@
         /* --- Table scroll wrapper --- */
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+        /* --- Nav active state --- */
+        .nav-links a.active { color: var(--accent); }
+
         /* --- Responsive: Tablet & Mobile (≤768px) --- */
         @media (max-width: 768px) {
             .container { padding: 0 1.25rem; }
@@ -203,38 +206,19 @@
             nav .inner { height: 50px; }
 
             .hamburger { display: flex; }
-            .lang-toggle { font-size: 0.8rem; padding: 6px 12px; margin-left: 0; }
+            .lang-toggle { font-size: 0.75rem; padding: 5px 10px; margin-left: 0; }
 
-            /* Fullscreen overlay behind menu */
-            .nav-overlay {
-                display: none; position: fixed; inset: 0; z-index: 98;
-                background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-                -webkit-backdrop-filter: blur(4px);
-            }
-            nav.open .nav-overlay { display: block; }
-
+            .nav-overlay { display: none; }
             .nav-links {
-                position: fixed; top: 0; right: 0; bottom: 0; width: 280px;
-                max-width: 85vw;
-                background: var(--surface);
-                flex-direction: column; align-items: stretch;
-                gap: 0; padding: 72px 0 2rem;
-                transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-                z-index: 99; overflow-y: auto; box-shadow: -8px 0 30px rgba(0,0,0,0.5);
+                position: fixed; top: 50px; left: 0; right: 0; bottom: 0;
+                background: rgba(11, 13, 17, 0.98);
+                flex-direction: column; align-items: center; justify-content: flex-start;
+                gap: 1.25rem; padding: 2.5rem 1.5rem;
+                transform: translateX(100%); transition: transform 0.25s ease;
+                z-index: 99; overflow-y: auto;
             }
             nav.open .nav-links { transform: translateX(0); }
-
-            .nav-links a {
-                font-size: 0.95rem; padding: 14px 28px; color: var(--text);
-                border-bottom: 1px solid var(--border); display: block;
-            }
-            .nav-links a:active { background: var(--accent-glow); }
-
-            .nav-links .lang-toggle {
-                margin: 1.5rem 28px 0; width: calc(100% - 56px);
-                border-color: var(--accent); color: var(--accent);
-                font-size: 0.8rem; padding: 8px 16px;
-            }
+            .nav-links a { font-size: 1rem; }
 
             .hero { padding: 100px 0 50px; }
             .hero h1 { font-size: 2rem; }
@@ -265,9 +249,8 @@
             nav { padding: 0 0.75rem; }
             nav .inner { height: 44px; }
             nav .logo { font-size: 0.95rem; }
-            .nav-links { width: 260px; }
-            .nav-links a { font-size: 0.88rem; padding: 13px 22px; }
-            .nav-links .lang-toggle { margin: 1.25rem 22px 0; width: calc(100% - 44px); }
+            .nav-links a { font-size: 0.9rem; }
+            .nav-links { padding: 2rem 1.25rem; }
 
             .hero { padding: 90px 0 40px; }
             .hero h1 { font-size: 1.6rem; }
@@ -900,6 +883,22 @@
                 else hint.style.opacity = '0.5';
             }, {passive: true});
         }
+
+        // Scroll spy — highlight current section in nav
+        var sections = document.querySelectorAll('section[id]');
+        var navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+        function updateActiveLink() {
+            var scrollPos = window.scrollY + 80;
+            var current = '';
+            sections.forEach(function(s) {
+                if (s.offsetTop <= scrollPos) current = s.id;
+            });
+            navLinks.forEach(function(a) {
+                a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+            });
+        }
+        window.addEventListener('scroll', updateActiveLink, {passive: true});
+        updateActiveLink();
     })();
 </script>
 
