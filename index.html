@@ -51,6 +51,22 @@
         nav a { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
         nav a:hover { color: #fff; }
 
+        /* Hamburger */
+        .hamburger {
+            display: none; background: none; border: none; cursor: pointer;
+            padding: 10px 8px; flex-direction: column; gap: 5px; z-index: 101;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .hamburger span {
+            display: block; width: 22px; height: 2px;
+            background: var(--text); border-radius: 2px;
+            transition: transform 0.25s, opacity 0.25s;
+            pointer-events: none;
+        }
+        nav.open .hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        nav.open .hamburger span:nth-child(2) { opacity: 0; }
+        nav.open .hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
         /* --- Lang toggle --- */
         .lang-toggle {
             background: var(--surface); border: 1px solid var(--border);
@@ -141,30 +157,113 @@
         .status-done { color: var(--green); }
         .status-wip  { color: var(--amber); }
 
+        /* --- Contact --- */
+        .contact-btns { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0; }
+        .contact-btn {
+            display: inline-block; padding: 10px 28px;
+            background: var(--accent); color: #fff;
+            text-decoration: none; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 600;
+            transition: background 0.2s;
+        }
+        .contact-btn:hover { background: #4a7de0; }
+        .contact-sep { color: var(--text-dim); margin: 0 0.75rem; }
+
         /* --- Footer --- */
         footer {
             border-top: 1px solid var(--border); padding: 2rem 0;
             text-align: center; font-size: 0.78rem; color: var(--text-dim);
         }
 
-        /* --- Responsive --- */
+        /* --- Table scroll wrapper --- */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* --- Responsive: Tablet & Mobile (≤768px) --- */
         @media (max-width: 768px) {
+            .container { padding: 0 1.25rem; }
+            nav { padding: 0 1rem; }
+            nav .inner { height: 50px; }
+
+            .hamburger { display: flex; }
+            .lang-toggle { font-size: 0.7rem; padding: 4px 8px; margin-left: 0; }
+
+            .nav-links {
+                position: fixed; top: 50px; left: 0; right: 0; bottom: 0;
+                background: rgba(11, 13, 17, 0.98);
+                flex-direction: column; align-items: center; justify-content: flex-start;
+                gap: 1.5rem; padding: 2.5rem 1.5rem;
+                transform: translateX(100%); transition: transform 0.3s ease;
+                z-index: 99; overflow-y: auto;
+            }
+            nav.open .nav-links { transform: translateX(0); }
+            .nav-links a { font-size: 1.05rem; padding: 0.5rem 0; }
+
+            .hero { padding: 100px 0 50px; }
             .hero h1 { font-size: 2rem; }
-            .hero { padding: 110px 0 50px; }
+            .hero .subtitle { font-size: 0.9rem; }
+            .hero .status-row { gap: 0.5rem; }
+            .hero .status-badge { font-size: 0.7rem; padding: 5px 12px; }
+
             section { padding: 50px 0; }
-            .card-grid { grid-template-columns: 1fr; }
-            .arch-block { font-size: 0.7rem; padding: 1rem; }
-            nav .nav-links { gap: 0.75rem; }
-            nav .nav-links a { font-size: 0.75rem; }
-            thead th, tbody td { padding: 8px 10px; font-size: 0.78rem; }
+            section h2 { font-size: 1.25rem; }
+            section .section-desc { font-size: 0.85rem; margin-bottom: 1.5rem; }
+
+            .card-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+            .card { padding: 1.25rem; }
+            .card h3 { font-size: 0.95rem; }
+            .card p { font-size: 0.8rem; }
+
+            .arch-block { font-size: 0.62rem; padding: 1rem; line-height: 1.5; }
+
+            table { font-size: 0.75rem; }
+            thead th, tbody td { padding: 6px 8px; }
+            tbody td:first-child { white-space: normal; }
+
+            .contact-btn { font-size: 0.8rem; padding: 8px 18px; }
+        }
+
+        /* --- Responsive: Small phone (≤480px) --- */
+        @media (max-width: 480px) {
+            nav { padding: 0 0.75rem; }
+            nav .inner { height: 44px; }
+            nav .logo { font-size: 0.95rem; }
+            .lang-toggle { font-size: 0.65rem; padding: 3px 6px; }
+            .nav-links a { font-size: 0.9rem; }
+            .nav-links { padding: 2rem 1.25rem; }
+
+            .hero { padding: 90px 0 40px; }
+            .hero h1 { font-size: 1.6rem; }
+            .hero .subtitle { font-size: 0.8rem; }
+            .hero .tag { font-size: 0.7rem; }
+            .hero .status-badge { font-size: 0.65rem; padding: 4px 10px; }
+
+            section { padding: 40px 0; }
+            section h2 { font-size: 1.1rem; }
+            section .section-desc { font-size: 0.8rem; }
+
+            .card { padding: 1rem; }
+            .card h3 { font-size: 0.9rem; }
+            .card p { font-size: 0.78rem; }
+
+            .arch-block { font-size: 0.55rem; padding: 0.75rem; line-height: 1.4; }
+
+            table { font-size: 0.68rem; }
+            thead th, tbody td { padding: 5px 6px; }
+
+            footer { font-size: 0.68rem; }
+
+            .contact-btns { flex-direction: column; gap: 0.75rem; }
+            .contact-sep { display: none; }
+            .contact-btn { font-size: 0.82rem; padding: 10px 20px; width: 100%; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-<nav>
+<nav id="topnav">
     <div class="inner">
         <div class="logo">Mn<span>Ex</span></div>
+        <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
         <div class="nav-links">
             <a href="#about"><span class="en">About</span><span class="zh">项目简介</span></a>
             <a href="#architecture"><span class="en">Architecture</span><span class="zh">架构</span></a>
@@ -173,7 +272,7 @@
             <a href="#status"><span class="en">Status</span><span class="zh">项目进度</span></a>
             <a href="#hiring"><span class="en">Hiring</span><span class="zh">招聘</span></a>
             <a href="#contact"><span class="en">Contact</span><span class="zh">联系</span></a>
-            <button class="lang-toggle" onclick="toggleLang()" title="Switch language">
+            <button class="lang-toggle" title="Switch language">
                 <span class="en">中文</span><span class="zh">EN</span>
             </button>
         </div>
@@ -395,7 +494,7 @@
     </div>
 
     <br>
-    <table>
+    <div class="table-wrap"><table>
         <thead>
             <tr>
                 <th>Prefix</th>
@@ -442,7 +541,7 @@
                 <td class="en">Collection of Persons</td><td class="zh">Person 的集合</td>
             </tr>
         </tbody>
-    </table>
+    </table></div>
 </section>
 
 <!-- ====== Key Decisions ====== -->
@@ -455,7 +554,7 @@
         塑造整个平台基调的基础决策。
     </p>
 
-    <table>
+    <div class="table-wrap"><table>
         <thead>
             <tr>
                 <th class="en">Decision</th><th class="zh">决策项</th>
@@ -500,7 +599,7 @@
                 <td class="en">Open by default; Revoke tightens, Grant restores</td><td class="zh">默认全开；Revoke 收紧，Grant 恢复</td>
             </tr>
         </tbody>
-    </table>
+    </table></div>
 </section>
 
 <!-- ====== Status ====== -->
@@ -691,9 +790,11 @@
         <p style="color:#fff;font-size:1.1rem;font-weight:600;margin-bottom:0.3rem;">Roger Wang</p>
         <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1.5rem;"><span class="en">Shanghai, Yangpu, East Bund · China</span><span class="zh">中国 · 上海 · 杨浦 · 东外滩</span></p>
 
-        <a href="mailto:Roger@menx.cn" style="display:inline-block;padding:10px 28px;background:var(--accent);color:#fff;text-decoration:none;border-radius:8px;font-size:0.9rem;font-weight:600;transition:background 0.2s;" onmouseover="this.style.background='#4a7de0'" onmouseout="this.style.background='var(--accent)'">Roger@menx.cn</a>
-        <span style="color:var(--text-dim);margin:0 0.75rem;">·</span>
-        <a href="mailto:7391117@qq.com" style="display:inline-block;padding:10px 28px;background:var(--accent);color:#fff;text-decoration:none;border-radius:8px;font-size:0.9rem;font-weight:600;transition:background 0.2s;" onmouseover="this.style.background='#4a7de0'" onmouseout="this.style.background='var(--accent)'">7391117@qq.com</a>
+        <div class="contact-btns">
+        <a href="mailto:Roger@menx.cn" class="contact-btn">Roger@menx.cn</a>
+        <span class="contact-sep">·</span>
+        <a href="mailto:7391117@qq.com" class="contact-btn">7391117@qq.com</a>
+        </div>
         <br><br>
         <span style="color:var(--text-dim);font-size:0.85rem;"><span class="en">Phone / WeChat: </span><span class="zh">电话 / 微信：</span></span>
         <span style="color:var(--text);font-size:0.9rem;">+86 186 1838 3366</span>
@@ -709,15 +810,36 @@
 </footer>
 
 <script>
-    function toggleLang() {
-        var html = document.documentElement;
-        html.lang = html.lang === 'zh' ? 'en' : 'zh';
-        try { localStorage.setItem('mnex-lang', html.lang); } catch(e) {}
-    }
-
     (function() {
+        var nav = document.getElementById('topnav');
+        var hamburger = nav.querySelector('.hamburger');
+        var navLinks = nav.querySelector('.nav-links');
+        var langToggle = nav.querySelector('.lang-toggle');
+
+        // Hamburger toggle
+        hamburger.addEventListener('click', function(e) {
+            e.preventDefault();
+            nav.classList.toggle('open');
+        });
+
+        // Close menu when clicking a link
+        navLinks.addEventListener('click', function(e) {
+            if (e.target.closest('a')) {
+                nav.classList.remove('open');
+            }
+        });
+
+        // Language toggle
+        langToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var html = document.documentElement;
+            html.lang = html.lang === 'zh' ? 'en' : 'zh';
+            try { localStorage.setItem('mnex-lang', html.lang); } catch(ex) {}
+        });
+
+        // Init language
         var saved = 'en';
-        try { saved = localStorage.getItem('mnex-lang') || 'en'; } catch(e) {}
+        try { saved = localStorage.getItem('mnex-lang') || 'en'; } catch(ex) {}
         document.documentElement.lang = saved;
     })();
 </script>
