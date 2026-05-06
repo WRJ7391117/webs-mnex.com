@@ -20,7 +20,7 @@
             --code-bg: #1a1d28;
         }
 
-        body {
+        html { scroll-behavior: smooth; }
             font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
             background: var(--bg);
             color: var(--text);
@@ -113,9 +113,11 @@
         /* Scroll indicator */
         .scroll-hint {
             margin-top: 2.5rem; display: inline-flex; flex-direction: column;
-            align-items: center; gap: 6px; opacity: 0.5;
+            align-items: center; gap: 6px; opacity: 0.6;
             animation: scrollPulse 2s ease-in-out infinite;
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
         }
+        .scroll-hint:hover { opacity: 0.9; }
         .scroll-hint .chevron {
             width: 18px; height: 18px; border-right: 2px solid var(--accent);
             border-bottom: 2px solid var(--accent);
@@ -323,7 +325,9 @@
         <div class="status-badge" style="background:rgba(239,91,141,0.12);border-color:rgba(239,91,141,0.3);color:#f472b6;"><span class="en">We're Hiring</span><span class="zh">招聘中</span></div>
     </div>
 
-    <div class="scroll-hint">
+    <div class="scroll-hint" onclick="window.scrollBy({top:window.innerHeight,behavior:'smooth'})">
+        <span class="en" style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;">Scroll to explore</span>
+        <span class="zh" style="font-size:0.72rem;color:var(--text-dim);margin-bottom:8px;">向下滚动了解更多</span>
         <div class="chevron"></div>
         <div class="chevron"></div>
         <div class="chevron"></div>
