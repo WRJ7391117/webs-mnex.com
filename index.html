@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MnEx — Multi-Agent Platform</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0b0d11;
+            --surface: #14171f;
+            --border: #1e2230;
+            --text: #c8cdd6;
+            --text-dim: #6b7280;
+            --accent: #5b8def;
+            --accent-glow: rgba(91, 141, 239, 0.15);
+            --green: #34d399;
+            --amber: #fbbf24;
+            --code-bg: #1a1d28;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* --- Language visibility --- */
+        html[lang="en"] .zh { display: none; }
+        html[lang="zh"] .en { display: none; }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(11, 13, 17, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        nav .inner {
+            max-width: 1040px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 56px;
+        }
+        nav .logo { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+        nav .logo span { color: var(--accent); }
+        nav .nav-links { display: flex; align-items: center; gap: 1.25rem; }
+        nav a { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+        nav a:hover { color: #fff; }
+
+        /* --- Lang toggle --- */
+        .lang-toggle {
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text); font-size: 0.78rem; padding: 5px 10px;
+            border-radius: 6px; cursor: pointer; transition: border-color 0.2s;
+            font-family: inherit; margin-left: 0.5rem;
+        }
+        .lang-toggle:hover { border-color: var(--accent); }
+
+        /* --- Layout --- */
+        .container { max-width: 1040px; margin: 0 auto; padding: 0 2rem; }
+
+        /* --- Hero --- */
+        .hero {
+            padding: 140px 0 80px;
+            text-align: center;
+        }
+        .hero .tag {
+            display: inline-block;
+            padding: 4px 14px; border-radius: 20px;
+            background: var(--accent-glow); color: var(--accent);
+            font-size: 0.78rem; letter-spacing: 0.5px; margin-bottom: 1.5rem;
+        }
+        .hero h1 { font-size: 3rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; margin-bottom: 1rem; }
+        .hero h1 span { color: var(--accent); }
+        .hero .subtitle {
+            font-size: 1.1rem; color: var(--text-dim); max-width: 640px; margin: 0 auto 2rem;
+        }
+        .hero .status-row {
+            display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;
+        }
+        .hero .status-badge {
+            padding: 6px 16px; border-radius: 20px;
+            font-size: 0.78rem; border: 1px solid var(--border);
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .hero .status-badge .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        .hero .status-badge .dot.green { background: var(--green); }
+        .hero .status-badge .dot.amber { background: var(--amber); }
+
+        /* --- Sections --- */
+        section { padding: 80px 0; border-top: 1px solid var(--border); }
+        section h2 {
+            font-size: 1.5rem; font-weight: 700; color: #fff;
+            margin-bottom: 1rem; letter-spacing: -0.5px;
+        }
+        section h2 .num { color: var(--accent); margin-right: 0.5rem; }
+        section .section-desc {
+            color: var(--text-dim); margin-bottom: 2.5rem; font-size: 0.95rem; max-width: 740px;
+        }
+
+        /* --- Architecture block --- */
+        .arch-block {
+            background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px;
+            padding: 2rem; font-size: 0.85rem; line-height: 1.8; overflow-x: auto;
+            white-space: pre; tab-size: 4;
+        }
+        .arch-block .c-accent { color: var(--accent); }
+        .arch-block .c-green { color: var(--green); }
+        .arch-block .c-amber { color: var(--amber); }
+        .arch-block .c-dim { color: var(--text-dim); }
+        .arch-block .c-white { color: #e5e7eb; }
+
+        /* --- Entity cards --- */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.25rem; }
+        .card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+            padding: 1.5rem; transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent); }
+        .card h3 { font-size: 1rem; color: #fff; margin-bottom: 0.4rem; }
+        .card .id-prefix {
+            font-size: 0.75rem; color: var(--accent); font-family: "SF Mono", "Fira Code", monospace;
+            margin-bottom: 0.6rem;
+        }
+        .card p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.65; }
+
+        /* --- Tables --- */
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        thead th {
+            text-align: left; padding: 10px 14px; color: var(--text-dim);
+            font-weight: 500; border-bottom: 1px solid var(--border);
+        }
+        tbody td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        tbody td:first-child { color: var(--accent); white-space: nowrap; }
+        tbody tr:hover td { background: var(--accent-glow); }
+
+        .status-done { color: var(--green); }
+        .status-wip  { color: var(--amber); }
+
+        /* --- Footer --- */
+        footer {
+            border-top: 1px solid var(--border); padding: 2rem 0;
+            text-align: center; font-size: 0.78rem; color: var(--text-dim);
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero { padding: 110px 0 50px; }
+            section { padding: 50px 0; }
+            .card-grid { grid-template-columns: 1fr; }
+            .arch-block { font-size: 0.7rem; padding: 1rem; }
+            nav .nav-links { gap: 0.75rem; }
+            nav .nav-links a { font-size: 0.75rem; }
+            thead th, tbody td { padding: 8px 10px; font-size: 0.78rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="inner">
+        <div class="logo">Mn<span>Ex</span></div>
+        <div class="nav-links">
+            <a href="#about"><span class="en">About</span><span class="zh">项目简介</span></a>
+            <a href="#architecture"><span class="en">Architecture</span><span class="zh">架构</span></a>
+            <a href="#entities"><span class="en">Entities</span><span class="zh">实体模型</span></a>
+            <a href="#decisions"><span class="en">Decisions</span><span class="zh">设计决策</span></a>
+            <a href="#status"><span class="en">Status</span><span class="zh">项目进度</span></a>
+            <a href="#hiring"><span class="en">Hiring</span><span class="zh">招聘</span></a>
+            <a href="#contact"><span class="en">Contact</span><span class="zh">联系</span></a>
+            <button class="lang-toggle" onclick="toggleLang()" title="Switch language">
+                <span class="en">中文</span><span class="zh">EN</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- ====== Hero ====== -->
+<header class="hero container">
+    <div class="tag"><span class="en">v4.0 · Design Phase</span><span class="zh">v4.0 · 架构设计阶段</span></div>
+    <h1>Mn<span>Ex</span></h1>
+    <p class="subtitle en">
+        A commercial multi-agent platform where developers publish agent definitions
+        and users install instances — like an App Store for AI agents.
+    </p>
+    <p class="subtitle zh">
+        商业化多 Agent 平台。开发者发布 Agent 定义，用户安装实例 —— 如同 AI Agent 的 App Store。
+    </p>
+    <div class="status-row">
+        <div class="status-badge"><span class="en">Entity layer</span><span class="zh">实体层</span></div>
+        <div class="status-badge"><span class="en">Relation layer</span><span class="zh">关系层</span></div>
+        <div class="status-badge"><span class="en">Asset layer</span><span class="zh">资产层</span></div>
+        <div class="status-badge"><span class="en">Permission layer</span><span class="zh">权限层</span></div>
+        <div class="status-badge" style="background:rgba(239,91,141,0.12);border-color:rgba(239,91,141,0.3);color:#f472b6;"><span class="en">We're Hiring</span><span class="zh">招聘中</span></div>
+    </div>
+</header>
+
+<!-- ====== About ====== -->
+<section id="about" class="container">
+    <h2><span class="num">00</span> <span class="en">What is MnEx</span><span class="zh">MnEx 是什么</span></h2>
+    <p class="section-desc en">
+        MnEx is a platform for building, deploying, and monetizing AI agents.
+        It originated from the OpenClaw personal multi-agent system and is evolving
+        into an open platform where third-party developers supply the agent marketplace.
+    </p>
+    <p class="section-desc zh">
+        MnEx 是一个用于构建、部署和商业化 AI Agent 的平台。它源自 OpenClaw 个人多 Agent 系统，
+        正在演进为一个开放的 Agent 平台，Agent 市场由第三方开发者供给。
+    </p>
+
+    <div class="card-grid">
+        <div class="card">
+            <h3 class="en">For Developers</h3>
+            <h3 class="zh">面向开发者</h3>
+            <p class="en">
+                Publish agent and team definitions to the marketplace.
+                Define capabilities, composition rules, and pricing.
+                Receive revenue share when users install your agents.
+            </p>
+            <p class="zh">
+                在市场中发布 Agent 和 Team 定义。设定能力、编排规则与定价。
+                用户安装你的 Agent 后即可获得收益分成。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">For Individuals &amp; Organizations</h3>
+            <h3 class="zh">面向个人与组织</h3>
+            <p class="en">
+                Browse and install agents into your Groups.
+                Agents learn and adapt within your context.
+                Manage permissions at the instance level.
+            </p>
+            <p class="zh">
+                浏览市场并将 Agent 安装到你的 Group 中。
+                Agent 在你的上下文中学习与适应。在实例级别管理权限。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">App Store Model</h3>
+            <h3 class="zh">App Store 模式</h3>
+            <p class="en">
+                Developers ship definitions; users install instances.
+                This separation enables safe multi-tenancy —
+                each Group runs its own instances with isolated memory.
+            </p>
+            <p class="zh">
+                开发者发布定义，用户安装实例。这种分离实现了安全的多租户架构——
+                每个 Group 运行自己的实例，记忆完全隔离。
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ====== Architecture ====== -->
+<section id="architecture" class="container">
+    <h2><span class="num">01</span> <span class="en">Four-Layer Primitive Architecture</span><span class="zh">四层原语架构</span></h2>
+    <p class="section-desc en">
+        The platform is built on four orthogonal layers, each solving one problem.
+        Layers depend top-down: Entity → Relation → Asset → Permission.
+    </p>
+    <p class="section-desc zh">
+        平台建立在四层正交原语之上，每层只解决一个问题。
+        从上往下依赖：Entity（实体）→ Relation（关系）→ Asset（资产）→ Permission（权限）。
+    </p>
+
+    <!-- English arch -->
+    <div class="arch-block en">
+<span class="c-accent">MnEx</span> <span class="c-dim">Four-Layer Primitives</span>
+
+<span class="c-accent">1. Entity</span>        <span class="c-green">✅</span>  <span class="c-dim">Independent things in the system</span>
+   ├── <span class="c-white">Agent</span>    <span class="c-dim">ad_ / a_</span>   <span class="c-dim">Definition · Instance · Context (3-layer identity stack)</span>
+   ├── <span class="c-white">Person</span>   <span class="c-dim">p_</span>         <span class="c-dim">Self-registration, default Group</span>
+   ├── <span class="c-white">Team</span>     <span class="c-dim">td_ / t_</span>   <span class="c-dim">Definition · Instance, install flow</span>
+   └── <span class="c-white">Group</span>    <span class="c-dim">g_</span>         <span class="c-dim">Default + user-created, role-based permissions</span>
+
+<span class="c-accent">2. Relation</span>      <span class="c-green">✅</span>  <span class="c-dim">How entities connect and transition</span>
+   ├── <span class="c-white">Person ∈ Group</span>        <span class="c-dim">N:N, invite / leave / kick / transfer</span>
+   ├── <span class="c-white">Team ↔ Group</span>         <span class="c-dim">Bind / unbind, N:1 Team→Group</span>
+   ├── <span class="c-white">Agent ∈ Team</span>         <span class="c-dim">N:1, installed alongside Team</span>
+   └── <span class="c-white">Agent ↔ Person</span>       <span class="c-dim">Derived from chain, no direct link</span>
+
+<span class="c-accent">3. Asset</span>         <span class="c-green">✅</span>  <span class="c-dim">Things entities produce or own</span>
+   ├── <span class="c-white">Interaction memory</span>   <span class="c-dim">Instance + Person level</span>
+   ├── <span class="c-white">Output memory</span>        <span class="c-dim">Instance level</span>
+   └── <span class="c-white">Agent knowledge</span>      <span class="c-dim">Definition level</span>
+
+<span class="c-accent">4. Permission</span>     <span class="c-green">✅</span>  <span class="c-dim">Data access authorization</span>
+   ├── <span class="c-white">Default open</span>         <span class="c-dim">Owner has natural access</span>
+   ├── <span class="c-white">Revoke → tighten</span>    <span class="c-dim">Explicit deny overrides</span>
+   └── <span class="c-white">Dual check chain</span>    <span class="c-dim">Asset access label → Permission revoke</span>
+    </div>
+
+    <!-- Chinese arch -->
+    <div class="arch-block zh">
+<span class="c-accent">MnEx</span> <span class="c-dim">四层原语架构</span>
+
+<span class="c-accent">1. Entity（实体）</span>     <span class="c-green">✅</span>  <span class="c-dim">系统中独立存在的东西</span>
+   ├── <span class="c-white">Agent</span>    <span class="c-dim">ad_ / a_</span>   <span class="c-dim">定义层 · 实例层 · 上下文层（三层身份栈）</span>
+   ├── <span class="c-white">Person</span>   <span class="c-dim">p_</span>         <span class="c-dim">自注册即激活，默认 Group</span>
+   ├── <span class="c-white">Team</span>     <span class="c-dim">td_ / t_</span>   <span class="c-dim">定义层 · 实例层，安装流程</span>
+   └── <span class="c-white">Group</span>    <span class="c-dim">g_</span>         <span class="c-dim">默认 Group + 用户创建，角色权限</span>
+
+<span class="c-accent">2. Relation（关系）</span>   <span class="c-green">✅</span>  <span class="c-dim">实体之间如何关联与变迁</span>
+   ├── <span class="c-white">Person ∈ Group</span>        <span class="c-dim">N:N，邀请 / 退出 / 踢人 / 转让</span>
+   ├── <span class="c-white">Team ↔ Group</span>         <span class="c-dim">绑定 / 解绑，Team→Group 多对一</span>
+   ├── <span class="c-white">Agent ∈ Team</span>         <span class="c-dim">N:1，随 Team 安装诞生</span>
+   └── <span class="c-white">Agent ↔ Person</span>       <span class="c-dim">从链路推导，不独立存在</span>
+
+<span class="c-accent">3. Asset（资产）</span>      <span class="c-green">✅</span>  <span class="c-dim">实体产生或拥有的东西</span>
+   ├── <span class="c-white">交互记忆</span>              <span class="c-dim">实例 + Person 级</span>
+   ├── <span class="c-white">产出记忆</span>              <span class="c-dim">实例级</span>
+   └── <span class="c-white">Agent 自身知识</span>       <span class="c-dim">定义级</span>
+
+<span class="c-accent">4. Permission（权限）</span> <span class="c-green">✅</span>  <span class="c-dim">数据访问授权</span>
+   ├── <span class="c-white">默认全开</span>              <span class="c-dim">所有者天然拥有</span>
+   ├── <span class="c-white">Revoke 收紧</span>          <span class="c-dim">显式拒绝覆盖</span>
+   └── <span class="c-white">双重检查链</span>            <span class="c-dim">Asset access 标签 → Permission revoke</span>
+    </div>
+
+    <br>
+    <p style="font-size:0.85rem;color:var(--text-dim);">
+        <span class="en">Core chain: </span><span class="zh">核心链路：</span>
+        <span style="color:var(--accent);">Person p_xxx ∈ Group g_xxx → bind Team t_xxx → contains Agent a_001, a_002</span>
+    </p>
+</section>
+
+<!-- ====== Entities ====== -->
+<section id="entities" class="container">
+    <h2><span class="num">06–10</span> <span class="en">Entity Specifications</span><span class="zh">实体设计规范</span></h2>
+    <p class="section-desc en">
+        Four entity types with a unified six-prefix ID system, each 12 hex digits.
+    </p>
+    <p class="section-desc zh">
+        四类实体，统一六前缀 ID 体系，均为 12 位十六进制。
+    </p>
+
+    <div class="card-grid">
+        <div class="card">
+            <h3>Agent</h3>
+            <div class="id-prefix">ad_ / a_</div>
+            <p class="en">
+                Three-layer identity stack: definition (published by developer),
+                instance (created when Team is installed), and context (runtime,
+                discarded after session).
+            </p>
+            <p class="zh">
+                三层身份栈：定义层（开发者发布）、实例层（Team 安装时创建）、
+                上下文层（运行时栈帧，session 结束即丢弃）。
+            </p>
+        </div>
+        <div class="card">
+            <h3>Person</h3>
+            <div class="id-prefix">p_</div>
+            <p class="en">
+                The atomic entity. Self-registration activates a Person.
+                Each Person automatically gets a default Group (single-person).
+                Contact fields for reachability.
+            </p>
+            <p class="zh">
+                原子实体。自注册即激活。每个 Person 自动获得默认 Group（单人）。
+                包含联系方式字段。
+            </p>
+        </div>
+        <div class="card">
+            <h3>Team</h3>
+            <div class="id-prefix">td_ / t_</div>
+            <p class="en">
+                A collection of Agents. Definition published by developer;
+                instance created when a Group installs the Team.
+                Team composition defines collaboration rules.
+            </p>
+            <p class="zh">
+                Agent 的集合。开发者发布定义，Group 安装时创建实例。
+                Team composition 定义协作规则。
+            </p>
+        </div>
+        <div class="card">
+            <h3>Group</h3>
+            <div class="id-prefix">g_</div>
+            <p class="en">
+                A collection of Persons. Default single-person Group
+                created automatically; user-created Groups for teams.
+                Role-based permissions and member management.
+            </p>
+            <p class="zh">
+                Person 的集合。默认单人 Group 自动创建；用户可创建多人群组。
+                角色权限与成员管理。
+            </p>
+        </div>
+    </div>
+
+    <br>
+    <table>
+        <thead>
+            <tr>
+                <th>Prefix</th>
+                <th class="en">Entity</th><th class="zh">实体</th>
+                <th class="en">Layer</th><th class="zh">层次</th>
+                <th class="en">Description</th><th class="zh">说明</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>ad_</td>
+                <td class="en">Agent Definition</td><td class="zh">Agent 定义</td>
+                <td class="en">Definition</td><td class="zh">定义层</td>
+                <td class="en">Template in the marketplace</td><td class="zh">市场中的模板</td>
+            </tr>
+            <tr>
+                <td>a_</td>
+                <td class="en">Agent Instance</td><td class="zh">Agent 实例</td>
+                <td class="en">Instance</td><td class="zh">实例层</td>
+                <td class="en">Runtime instance, within a Team</td><td class="zh">运行时的实例，归属于 Team</td>
+            </tr>
+            <tr>
+                <td>td_</td>
+                <td class="en">Team Definition</td><td class="zh">Team 定义</td>
+                <td class="en">Definition</td><td class="zh">定义层</td>
+                <td class="en">Package in the marketplace</td><td class="zh">市场中的套餐</td>
+            </tr>
+            <tr>
+                <td>t_</td>
+                <td class="en">Team Instance</td><td class="zh">Team 实例</td>
+                <td class="en">Instance</td><td class="zh">实例层</td>
+                <td class="en">Runtime instance, bound to a Group</td><td class="zh">运行时的实例，绑定到 Group</td>
+            </tr>
+            <tr>
+                <td>p_</td>
+                <td class="en">Person</td><td class="zh">Person</td>
+                <td>—</td>
+                <td class="en">Natural person, self-registered</td><td class="zh">自然人，自注册</td>
+            </tr>
+            <tr>
+                <td>g_</td>
+                <td class="en">Group</td><td class="zh">Group</td>
+                <td>—</td>
+                <td class="en">Collection of Persons</td><td class="zh">Person 的集合</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ====== Key Decisions ====== -->
+<section id="decisions" class="container">
+    <h2><span class="num">03</span> <span class="en">Key Design Decisions</span><span class="zh">核心设计决策</span></h2>
+    <p class="section-desc en">
+        Foundational choices that shape the entire platform.
+    </p>
+    <p class="section-desc zh">
+        塑造整个平台基调的基础决策。
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="en">Decision</th><th class="zh">决策项</th>
+                <th class="en">Outcome</th><th class="zh">结论</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="en">User model</td><td class="zh">用户模型</td>
+                <td class="en">Individual = single-person Group; unified data model</td><td class="zh">个人 = 单人 Group，统一数据模型</td>
+            </tr>
+            <tr>
+                <td class="en">Market model</td><td class="zh">市场模型</td>
+                <td class="en">App Store analogy — developers publish definitions, users install instances</td><td class="zh">App Store 类比——开发者发定义，用户装实例</td>
+            </tr>
+            <tr>
+                <td class="en">Entity model</td><td class="zh">实体模型</td>
+                <td class="en">Agent / Person / Team / Group — four types</td><td class="zh">Agent / Person / Team / Group 四类</td>
+            </tr>
+            <tr>
+                <td class="en">ID system</td><td class="zh">ID 体系</td>
+                <td class="en">Six prefixes (ad_/a_/td_/t_/p_/g_), 12 hex digits</td><td class="zh">六前缀（ad_/a_/td_/t_/p_/g_），12 位十六进制</td>
+            </tr>
+            <tr>
+                <td class="en">Architecture</td><td class="zh">架构原则</td>
+                <td class="en">Four-layer primitives, top-down dependency</td><td class="zh">四层原语，从上往下依赖</td>
+            </tr>
+            <tr>
+                <td class="en">Entity isolation</td><td class="zh">实体隔离</td>
+                <td class="en">Group → Team → Agent, no cross-layer access</td><td class="zh">Group → Team → Agent，不跨层</td>
+            </tr>
+            <tr>
+                <td class="en">Memory isolation</td><td class="zh">记忆隔离</td>
+                <td class="en">Four-link chain; cross-Group learning only via definition upgrades</td><td class="zh">四层记忆链路；跨 Group 学习仅走定义升级</td>
+            </tr>
+            <tr>
+                <td class="en">Preference control</td><td class="zh">偏好控制</td>
+                <td class="en">Field-level access tags, self-describing</td><td class="zh">字段级 access 标签，自描述</td>
+            </tr>
+            <tr>
+                <td class="en">Permission default</td><td class="zh">权限默认</td>
+                <td class="en">Open by default; Revoke tightens, Grant restores</td><td class="zh">默认全开；Revoke 收紧，Grant 恢复</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ====== Status ====== -->
+<section id="status" class="container">
+    <h2><span class="num">04</span> <span class="en">Project Status</span><span class="zh">项目进度</span></h2>
+    <p class="section-desc en">
+        MnEx is in active development. The core architecture and specifications are being established,
+        and the team is working toward the first implementation milestone.
+    </p>
+    <p class="section-desc zh">
+        MnEx 正在积极开发中，核心架构与设计规范持续迭代，团队正朝着首个实现里程碑推进。
+    </p>
+
+    <div class="card-grid">
+        <div class="card">
+            <h3 class="en">Architecture Design</h3>
+            <h3 class="zh">架构设计</h3>
+            <p class="en">
+                The four-layer primitive architecture (Entity · Relation · Asset · Permission)
+                and entity specifications are being refined. Design decisions are documented
+                and iterated upon.
+            </p>
+            <p class="zh">
+                四层原语架构（Entity · Relation · Asset · Permission）与实体规范
+                持续完善中，设计决策已文档化并持续迭代。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">Team Building</h3>
+            <h3 class="zh">团队组建</h3>
+            <p class="en">
+                We are actively recruiting engineers and designers across backend,
+                AI/LLM, frontend, platform, DevOps, and security to build the
+                founding team.
+            </p>
+            <p class="zh">
+                正在招募后端、AI/LLM、前端、平台、DevOps、安全等方向的工程师和设计师，
+                组建创始团队。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">Implementation</h3>
+            <h3 class="zh">工程实现</h3>
+            <p class="en">
+                Building the core primitive engine, agent runtime, and developer
+                toolchain. Committed to delivering a production-grade multi-agent
+                platform.
+            </p>
+            <p class="zh">
+                推进核心原语引擎、Agent 运行时和开发者工具链的建设，
+                致力于交付生产级多 Agent 平台。
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ====== Hiring ====== -->
+<section id="hiring" class="container">
+    <h2><span class="num">05</span> <span class="en">We're Hiring</span><span class="zh">诚聘英才</span></h2>
+    <p class="section-desc en">
+        We are building the core team to turn the MnEx architecture into reality.
+        Join us in shaping the future of multi-agent platforms.
+    </p>
+    <p class="section-desc zh">
+        我们正在组建核心团队，将 MnEx 架构变为现实。
+        加入我们，一起塑造多 Agent 平台的未来。
+    </p>
+
+    <div class="card-grid">
+        <div class="card">
+            <h3 class="en">Backend / Infrastructure Engineer</h3>
+            <h3 class="zh">后端 / 基础设施工程师</h3>
+            <p class="en">
+                Design and build the four-layer primitive engine: Entity storage,
+                Relation flows, Asset pipelines, and Permission enforcement.
+                High-concurrency, multi-tenant data isolation.
+            </p>
+            <p class="zh">
+                设计与构建四层原语引擎：Entity 存储、Relation 流程、
+                Asset 管线、Permission 实施。高并发、多租户数据隔离。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">AI / LLM Engineer</h3>
+            <h3 class="zh">AI / LLM 工程师</h3>
+            <p class="en">
+                Build the LLM abstraction layer: unified tool-calling across
+                model providers, message format adaptation, context window
+                management, prompt routing.
+            </p>
+            <p class="zh">
+                构建 LLM 抽象层：跨模型厂商的统一 tool-calling、消息格式适配、
+                上下文窗口管理、提示词路由。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">Agent Runtime Engineer</h3>
+            <h3 class="zh">Agent 运行时工程师</h3>
+            <p class="en">
+                Implement the agent execution engine: definition-to-instance
+                lifecycle, three-layer identity stack, memory four-link chain,
+                and workflow orchestration primitives.
+            </p>
+            <p class="zh">
+                实现 Agent 执行引擎：定义到实例的全生命周期、三层身份栈、
+                四层记忆链路、工作流编排原语。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">Frontend / Full-stack Engineer</h3>
+            <h3 class="zh">前端 / 全栈工程师</h3>
+            <p class="en">
+                Build the platform dashboard, agent marketplace UI, and developer
+                portal. Craft the experience for browsing, installing, and
+                managing agents across Groups.
+            </p>
+            <p class="zh">
+                构建平台控制台、Agent 市场界面与开发者门户。打造跨 Group
+                浏览、安装、管理 Agent 的用户体验。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">Platform / DevTools Engineer</h3>
+            <h3 class="zh">平台 / 开发者工具工程师</h3>
+            <p class="en">
+                Build the developer toolchain: agent SDK, CLI, local testing
+                environment, definition schema validation, and publishing pipeline.
+            </p>
+            <p class="zh">
+                构建开发者工具链：Agent SDK、CLI、本地测试环境、定义规范校验、
+                发布流水线。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">DevOps / SRE</h3>
+            <h3 class="zh">DevOps / SRE</h3>
+            <p class="en">
+                Infrastructure as code, multi-cloud deployment, observability
+                stack, and cost optimization. Build the foundation for a
+                reliable, scalable multi-agent platform.
+            </p>
+            <p class="zh">
+                基础设施即代码、多云部署、可观测性体系、成本优化。
+                为可靠、可扩展的多 Agent 平台打下基础。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">Security Engineer</h3>
+            <h3 class="zh">安全工程师</h3>
+            <p class="en">
+                Design and audit the permission system, data isolation boundaries,
+                and agent sandboxing. Ensure cross-Group isolation and secure
+                agent execution environments.
+            </p>
+            <p class="zh">
+                设计与审计权限系统、数据隔离边界与 Agent 沙箱。
+                确保跨 Group 隔离和安全的 Agent 执行环境。
+            </p>
+        </div>
+        <div class="card">
+            <h3 class="en">Product Designer</h3>
+            <h3 class="zh">产品设计师</h3>
+            <p class="en">
+                Design the end-to-end experience: agent discovery, installation
+                flow, Group management, and developer publishing tools.
+                Shape how humans and agents collaborate.
+            </p>
+            <p class="zh">
+                设计端到端体验：Agent 发现、安装流程、Group 管理、开发者发布工具。
+                塑造人与 Agent 协作的方式。
+            </p>
+        </div>
+    </div>
+
+</section>
+
+<!-- ====== Contact ====== -->
+<section id="contact" class="container">
+    <h2><span class="num">06</span> <span class="en">Contact</span><span class="zh">联系我们</span></h2>
+    <p class="section-desc en">
+        Interested in the project or joining the team? We'd love to hear from you.
+    </p>
+    <p class="section-desc zh">
+        对项目感兴趣或想加入团队？欢迎与我们联系。
+    </p>
+
+    <div style="text-align:center;padding:1rem 0 2rem;">
+        <p style="color:#fff;font-size:1.1rem;font-weight:600;margin-bottom:0.3rem;">Roger Wang</p>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1.5rem;"><span class="en">Shanghai, Yangpu, East Bund · China</span><span class="zh">中国 · 上海 · 杨浦 · 东外滩</span></p>
+
+        <a href="mailto:Roger@menx.cn" style="display:inline-block;padding:10px 28px;background:var(--accent);color:#fff;text-decoration:none;border-radius:8px;font-size:0.9rem;font-weight:600;transition:background 0.2s;" onmouseover="this.style.background='#4a7de0'" onmouseout="this.style.background='var(--accent)'">Roger@menx.cn</a>
+        <span style="color:var(--text-dim);margin:0 0.75rem;">·</span>
+        <a href="mailto:7391117@qq.com" style="display:inline-block;padding:10px 28px;background:var(--accent);color:#fff;text-decoration:none;border-radius:8px;font-size:0.9rem;font-weight:600;transition:background 0.2s;" onmouseover="this.style.background='#4a7de0'" onmouseout="this.style.background='var(--accent)'">7391117@qq.com</a>
+        <br><br>
+        <span style="color:var(--text-dim);font-size:0.85rem;"><span class="en">Phone / WeChat: </span><span class="zh">电话 / 微信：</span></span>
+        <span style="color:var(--text);font-size:0.9rem;">+86 186 1838 3366</span>
+    </div>
+</section>
+
+<!-- ====== Footer ====== -->
+<footer>
+    <div class="container">
+        <span class="en">MnEx — Multi-Agent Platform · Architecture v4.0 · Last updated 2026-05-05</span>
+        <span class="zh">MnEx — 多 Agent 平台 · 架构 v4.0 · 最后更新 2026-05-05</span>
+    </div>
+</footer>
+
+<script>
+    function toggleLang() {
+        var html = document.documentElement;
+        html.lang = html.lang === 'zh' ? 'en' : 'zh';
+        try { localStorage.setItem('mnex-lang', html.lang); } catch(e) {}
+    }
+
+    (function() {
+        var saved = 'en';
+        try { saved = localStorage.getItem('mnex-lang') || 'en'; } catch(e) {}
+        document.documentElement.lang = saved;
+    })();
+</script>
+
+</body>
+</html>
