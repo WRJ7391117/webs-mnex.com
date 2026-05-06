@@ -39,7 +39,10 @@
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             padding: 0 2rem;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
         }
+        nav.hidden { transform: translateY(-100%); }
         nav .inner {
             max-width: 1040px; margin: 0 auto;
             display: flex; align-items: center; justify-content: space-between;
@@ -884,20 +887,33 @@
             }, {passive: true});
         }
 
+        // Auto-hide nav on scroll down, show on scroll up
+        var lastScroll = 0;
+        var scrollHandler = function() {
+            var y = window.scrollY;
+            if (y > lastScroll && y > 80) nav.classList.add('hidden');
+            else nav.classList.remove('hidden');
+            lastScroll = y;
+        };
+
         // Scroll spy — highlight current section in nav
         var sections = document.querySelectorAll('section[id]');
-        var navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+        var navLinkEls = document.querySelectorAll('.nav-links a[href^="#"]');
         function updateActiveLink() {
             var scrollPos = window.scrollY + 80;
             var current = '';
             sections.forEach(function(s) {
                 if (s.offsetTop <= scrollPos) current = s.id;
             });
-            navLinks.forEach(function(a) {
+            navLinkEls.forEach(function(a) {
                 a.classList.toggle('active', a.getAttribute('href') === '#' + current);
             });
         }
-        window.addEventListener('scroll', updateActiveLink, {passive: true});
+
+        window.addEventListener('scroll', function() {
+            scrollHandler();
+            updateActiveLink();
+        }, {passive: true});
         updateActiveLink();
     })();
 </script>
